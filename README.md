@@ -1,5 +1,7 @@
 # 🗂️ AI Cache Migrate
 
+> 🚀 Move your AI assistant cache off C: drive with zero app awareness. NTFS junction, one script, done.
+
 > NTFS Junction 缓存迁移 — 把 AI 助手的数据从 C 盘搬到其他盘，应用无感知
 
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
