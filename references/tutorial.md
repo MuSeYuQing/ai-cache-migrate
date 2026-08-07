@@ -63,8 +63,8 @@ du -sh "$SRC" "$DST"
 # 4. 删除 C 盘源目录
 rm -rf "$SRC"
 
-# 5. 创建 NTFS Junction（注意：路径必须用 Windows 反斜杠）
-cmd /c "mklink /J \"C:\\Users\\$USER\\AppData\\Local\\$APP\" \"D:\\Users\\$USER\\AppData\\Local\\$APP\""
+# 5. 创建 NTFS Junction（使用 PowerShell，比 cmd /c mklink 更可靠）
+powershell -NoProfile -Command "New-Item -ItemType Junction -Path 'C:\Users\$USER\AppData\Local\$APP' -Target 'D:\Users\$USER\AppData\Local\$APP' -Force"
 
 # 6. 验证 Junction
 fsutil reparsepoint query "C:\\Users\\$USER\\AppData\\Local\\$APP"
@@ -84,7 +84,7 @@ fsutil reparsepoint query "C:\\Users\\$USER\\AppData\\Local\\$APP"
    ```bash
    mv "$SRC" "$SRC.bak"
    # 然后建 junction 指向 D 盘
-   cmd /c "mklink /J \"...\" \"...\""
+   powershell -NoProfile -Command "New-Item -ItemType Junction -Path '...' -Target '...' -Force"
    # .bak 残留重启后自动可删
    ```
 
@@ -111,15 +111,15 @@ ls -la "$DST"
 # 检查 junction 指向
 fsutil reparsepoint query "C:\..." | grep "Substitute"
 
-# 如果路径写错 → 删 junction（用 rmdir！）→ 重建
-cmd /c "rmdir \"C:\...\""
+# 如果路径写错 → 删 junction → 重建
+powershell -NoProfile -Command "Remove-Item 'C:\...' -Force"
 ```
 
 ## 回滚方法
 
 ```bash
-# 1. 删除 junction（是 rmdir，不是 rm -rf！rm -rf 会顺着 junction 删 D 盘数据）
-cmd /c "rmdir \"C:\\Users\\$USER\\<路径>\""
+# 1. 删除 junction（用 PowerShell Remove-Item，不要用 rm -rf！）
+powershell -NoProfile -Command "Remove-Item 'C:\Users\$USER\<路径>' -Force"
 
 # 2. 将 D 盘数据复制回 C 盘
 cp -r "/d/Users/$USER/<路径>" "/c/Users/$USER/<路径>"
@@ -130,13 +130,18 @@ cp -r "/d/Users/$USER/<路径>" "/c/Users/$USER/<路径>"
 ```bash
 # 定期检查所有 junction 是否完好（把下面路径替换为你实际的）
 for p in \
+  "AppData/Local/Programs/kimi-desktop" \
+  "AppData/Roaming/kimi-desktop" \
+  "AppData/Local/kimi-desktop-updater" \
+  "AppData/Local/KimiAppCache" \
+  "AppData/Local/Doubao" \
   ".vscode/extensions" \
   ".claude" \
   ".workbuddy" \
   "AppData/Local/Claude-3p" \
   "AppData/Local/ima.copilot" \
   "AppData/Local/Qianwen"; do
-  printf "%-50s " "$p"
+  printf "%-55s " "$p"
   fsutil reparsepoint query "C:/Users/$USER/$p" 2>&1 | grep -q "Reparse Tag" && echo "✅" || echo "❌ 需修复"
 done
 ```
@@ -146,6 +151,8 @@ done
 | 软件 | 路径 | 典型大小 |
 |------|------|----------|
 | Claude Desktop | `AppData\Local\Claude-3p` | 5-15 GB |
+| Kimi Desktop | `AppData\Local\Programs\kimi-desktop`, `AppData\Roaming\kimi-desktop` | 2-4 GB |
+| Doubao 桌面模式 | `AppData\Local\Doubao` | 1-2 GB |
 | Claude Code | `.claude` | 50-200 MB |
 | ChatGPT Desktop | `AppData\Local\chatgpt` / `AppData\Local\OpenAI` | 1-5 GB |
 | CodeBuddy CN | `AppData\Roaming\CodeBuddy CN` | 100-500 MB |

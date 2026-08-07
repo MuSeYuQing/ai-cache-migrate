@@ -50,25 +50,29 @@ du -sh /c/Users/$USER/AppData/Local/*/ 2>/dev/null | grep -iE "claude|openai|cha
 
 ```bash
 # 1. 确保 D 盘父目录存在
-mkdir -p "D:/Users/$USER/<目标路径>"
+mkdir -p "/d/Users/$USER/<父目录>"
 
 # 2. 复制数据到 D 盘
-cp -r "/c/Users/$USER/<源路径>/"* "/d/Users/$USER/<目标路径>/"
+cp -r "/c/Users/$USER/<源路径>" "/d/Users/$USER/<源路径>/.." 2>/dev/null
 
-# 3. 删除 C 盘源目录
+# 3. 验证复制完整性（两边大小应接近）
+du -sh "/c/Users/$USER/<源路径>" "/d/Users/$USER/<源路径>"
+
+# 4. 删除 C 盘源目录
 rm -rf "/c/Users/$USER/<源路径>"
 
-# 4. 创建 NTFS Junction
-cmd /c "mklink /J \"C:\\Users\\$USER\\<源路径>\" \"D:\\Users\\$USER\\<目标路径>\""
+# 5. 创建 NTFS Junction（使用 PowerShell，比 cmd /c mklink 更可靠）
+powershell -NoProfile -Command "New-Item -ItemType Junction -Path 'C:\Users\$USER\<源路径>' -Target 'D:\Users\$USER\<源路径>' -Force"
 
-# 5. 验证
+# 6. 验证
 fsutil reparsepoint query "C:\\Users\\$USER\\<源路径>"
 # ✅ 输出 "Reparse Tag Value : 0xa0000003" → 成功
 ```
 
 **关键注意事项：**
 - 步骤 3 删除源目录前，务必确认步骤 2 复制完整（检查 `du -sh` 两边的值接近）
-- 步骤 4 的路径分隔符必须用 Windows 风格 `\`（cmd.exe 要求）
+- **推荐用 PowerShell `New-Item -ItemType Junction`** 而不是 `cmd /c mklink /J` — 后者在 Git Bash 环境下容易静默失败
+- `-Force` 参数不会覆盖已有 junction 的目标内容，只是确保命令不会因为目标存在而报错
 - 步骤 5 如果报错，数据仍在 D 盘安全，排查后重建 junction 即可
 - **不要用 `robocopy`** — 在 bash 环境下行为异常，`/MOVE` 可能被误解析为 `/MIR`
 - **不要用 `rm -rf` 删除 junction 本身** — 这会顺着 junction 删除 D 盘数据。用 `cmd /c "rmdir \"C:\...\""` 或 `rmdir`
@@ -117,8 +121,8 @@ fsutil reparsepoint query "C:\path\to\dir"
 如果迁移后软件异常，可以回退：
 
 ```bash
-# 1. 删除 junction（使用 rmdir，不是 rm -rf！）
-cmd /c "rmdir \"C:\Users\$USER\<路径>\""
+# 1. 删除 junction（使用 PowerShell Remove-Item，不要用 rm -rf！）
+powershell -NoProfile -Command "Remove-Item 'C:\Users\$USER\<路径>' -Force"
 
 # 2. 将 D 盘数据复制回 C 盘
 cp -r "/d/Users/$USER/<路径>" "/c/Users/$USER/<路径>"
@@ -130,11 +134,16 @@ cp -r "/d/Users/$USER/<路径>" "/c/Users/$USER/<路径>"
 
 ```bash
 for p in \
+  "AppData/Local/Programs/kimi-desktop" \
+  "AppData/Roaming/kimi-desktop" \
+  "AppData/Local/kimi-desktop-updater" \
+  "AppData/Local/KimiAppCache" \
+  "AppData/Local/Doubao" \
   ".vscode/extensions" \
   ".claude" \
   ".workbuddy" \
   "AppData/Local/Claude-3p"; do
-  printf "%-50s " "$p"
+  printf "%-55s " "$p"
   fsutil reparsepoint query "C:/Users/$USER/$p" 2>&1 | grep -q "Reparse Tag" && echo "✅" || echo "❌ 需修复"
 done
 ```

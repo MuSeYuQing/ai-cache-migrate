@@ -122,13 +122,16 @@ else
 fi
 
 # ---- Step 3: Create junction ----
+# Use PowerShell New-Item -ItemType Junction (more reliable than cmd /c mklink in bash)
 log_info "Creating NTFS junction..."
-if cmd /c "mklink /J \"${SRC_WIN}\" \"${DST_WIN}\"" 2>&1; then
+if powershell.exe -NoProfile -Command \
+    "New-Item -ItemType Junction -Path '${SRC_WIN}' -Target '${DST_WIN}' -Force" >/dev/null 2>&1; then
     log_ok "Junction created"
 else
     log_error "Junction creation failed!"
     log_error "Data is safe on ${D_DRIVE} drive at: ${DST}"
-    log_error "Manual recovery: cmd /c \"mklink /J \\\"${SRC_WIN}\\\" \\\"${DST_WIN}\\\"\""
+    log_error "Manual recovery:"
+    log_error "  powershell -NoProfile -Command \"New-Item -ItemType Junction -Path '${SRC_WIN}' -Target '${DST_WIN}' -Force\""
     exit 1
 fi
 

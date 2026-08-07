@@ -20,6 +20,8 @@ AI 桌面应用（Claude Desktop、ChatGPT、CodeBuddy、Cline 等）往往在 `
 | 项目 | 大小 | 迁移结果 |
 |------|------|----------|
 | Claude Desktop | 14.0 GB | ✅ |
+| Kimi Desktop | 2.7 GB | ✅ |
+| Doubao 桌面模式 | 1.5 GB | ✅ |
 | WorkBuddy | 1.4 GB | ✅ |
 | iMA Copilot | 765 MB | ✅ |
 | Qianwen | 540 MB | ✅ |
@@ -27,7 +29,7 @@ AI 桌面应用（Claude Desktop、ChatGPT、CodeBuddy、Cline 等）往往在 `
 | MetisBot Updater | 204 MB | ✅ |
 | CodeBuddy CN | 181 MB | ✅ |
 | Claude Code (.claude) | 64 MB | ✅ |
-| **合计释放 C 盘** | **~18 GB** | |
+| **合计释放 C 盘** | **~22 GB** | |
 
 ## 原理
 
@@ -86,13 +88,15 @@ cp -r ai-cache-migrate ~/.claude/skills/ai-cache-migrate
 |------|----------|
 | Claude Desktop | `AppData\Local\Claude-3p` |
 | Claude Code (VSCode) | `.claude` |
+| Kimi Desktop | `AppData\Local\Programs\kimi-desktop`, `AppData\Roaming\kimi-desktop`, `AppData\Local\kimi-desktop-updater`, `AppData\Local\KimiAppCache` |
+| Doubao 桌面模式 | `AppData\Local\Doubao` |
 | ChatGPT Desktop | `AppData\Local\chatgpt` |
 | CodeBuddy CN | `AppData\Roaming\CodeBuddy CN` |
 | Cline (VSCode) | `.vscode\extensions\` (相关部分) |
 | 通义千问 | `AppData\Local\Qianwen` |
 | iMA Copilot | `AppData\Local\ima.copilot` |
 | WorkBuddy | `.workbuddy` |
-| Kimi / 豆包 / Marscode | `AppData\Local\` 下搜索 |
+| 豆包 / MarsCode | `AppData\Local\` 下搜索 |
 
 > 不确定某软件的缓存位置？用任务管理器看进程名 → `AppData\Local\<进程名>` 八成就是。
 
