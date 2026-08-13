@@ -93,8 +93,8 @@ echo ""
 
 # ---- Step 1: Copy data to D drive ----
 log_info "Copying data to ${D_DRIVE} drive..."
-DST_PARENT=$(dirname "${DST}")
-mkdir -p "${DST_PARENT}"
+# 必须先建目标目录本身（不能只建父目录），否则 cp -r 多源展开时目标不存在会失败
+mkdir -p "${DST}"
 
 if cp -r "${SRC}/"* "${DST}/" 2>/dev/null; then
     log_ok "Copy complete"
@@ -122,16 +122,14 @@ else
 fi
 
 # ---- Step 3: Create junction ----
-# Use PowerShell New-Item -ItemType Junction (more reliable than cmd /c mklink in bash)
 log_info "Creating NTFS junction..."
-if powershell.exe -NoProfile -Command \
-    "New-Item -ItemType Junction -Path '${SRC_WIN}' -Target '${DST_WIN}' -Force" >/dev/null 2>&1; then
+# 用 PowerShell New-Item 建 junction（Git Bash 调 cmd /c mklink 有引号转义问题）
+if powershell.exe -NoProfile -Command "New-Item -ItemType Junction -Path '${SRC_WIN}' -Target '${DST_WIN}' | Out-Null" >/dev/null 2>&1; then
     log_ok "Junction created"
 else
     log_error "Junction creation failed!"
     log_error "Data is safe on ${D_DRIVE} drive at: ${DST}"
-    log_error "Manual recovery:"
-    log_error "  powershell -NoProfile -Command \"New-Item -ItemType Junction -Path '${SRC_WIN}' -Target '${DST_WIN}' -Force\""
+    log_error "Manual recovery: PowerShell > New-Item -ItemType Junction -Path '${SRC_WIN}' -Target '${DST_WIN}'"
     exit 1
 fi
 

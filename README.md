@@ -17,19 +17,24 @@ AI 桌面应用（Claude Desktop、ChatGPT、CodeBuddy、Cline 等）往往在 `
 
 ## 实测效果
 
+> 2026-08-13 更新：新增 Kimi / 千问 Roaming / CodeBuddy 迁移；WorkBuddy Updater、MetisBot Updater 已随软件卸载移除。
+
 | 项目 | 大小 | 迁移结果 |
 |------|------|----------|
-| Claude Desktop | 14.0 GB | ✅ |
-| Kimi Desktop | 2.7 GB | ✅ |
-| Doubao 桌面模式 | 1.5 GB | ✅ |
-| WorkBuddy | 1.4 GB | ✅ |
+| Claude Desktop (Claude-3p) | 14.0 GB | ✅ |
+| Qianwen (Local) | 3.4 GB | ✅ |
+| WorkBuddy (.workbuddy) | 2.7 GB | ✅ |
 | iMA Copilot | 765 MB | ✅ |
-| Qianwen | 540 MB | ✅ |
-| WorkBuddy Updater | 489 MB | ✅ |
-| MetisBot Updater | 204 MB | ✅ |
-| CodeBuddy CN | 181 MB | ✅ |
-| Claude Code (.claude) | 64 MB | ✅ |
-| **合计释放 C 盘** | **~22 GB** | |
+| CodeBuddy CN (Roaming) | 179 MB | ✅ |
+| Kimi (.kimi-work) | 141 MB | ✅ |
+| Qianwen (Roaming) | 69 MB | ✅ |
+| Claude Code (.claude) | 59 MB | ✅ |
+| CodeBuddyExtension | 49 MB | ✅ |
+| CodeBuddy (.codebuddy) | 48 MB | ✅ |
+| Kimi webbridge | 10 MB | ✅ |
+| **合计释放 C 盘** | **~21.4 GB** | |
+
+> 注：Kimi Desktop（约 2.7 GB）与 Doubao 桌面模式（约 1.5 GB）在其他机器/环境实测过可迁移，数据量视使用情况而定。
 
 ## 原理
 
@@ -89,11 +94,12 @@ cp -r ai-cache-migrate ~/.claude/skills/ai-cache-migrate
 | Claude Desktop | `AppData\Local\Claude-3p` |
 | Claude Code (VSCode) | `.claude` |
 | Kimi Desktop | `AppData\Local\Programs\kimi-desktop`, `AppData\Roaming\kimi-desktop`, `AppData\Local\kimi-desktop-updater`, `AppData\Local\KimiAppCache` |
+| Kimi (工作数据) | `.kimi-work`, `.kimi-webbridge` |
 | Doubao 桌面模式 | `AppData\Local\Doubao` |
 | ChatGPT Desktop | `AppData\Local\chatgpt` |
 | CodeBuddy CN | `AppData\Roaming\CodeBuddy CN` |
 | Cline (VSCode) | `.vscode\extensions\` (相关部分) |
-| 通义千问 | `AppData\Local\Qianwen` |
+| 通义千问 | `AppData\Local\Qianwen`、`AppData\Roaming\Qianwen` |
 | iMA Copilot | `AppData\Local\ima.copilot` |
 | WorkBuddy | `.workbuddy` |
 | 豆包 / MarsCode | `AppData\Local\` 下搜索 |
